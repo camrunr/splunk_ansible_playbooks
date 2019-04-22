@@ -1,0 +1,40 @@
+---
+- name: Turn HEC TOKEN on or off
+  hosts: all
+  vars_prompt:
+    - name: adminuser
+      prompt: "Admin user"
+      private: no
+    - name: adminpass
+      prompt: "Admin password"
+      private: yes
+    - name: token
+      prompt: "Token"
+      private: no
+    - name: mode
+      prompt: "Token Disabled?(1-yes/0-no)"
+      private: no
+
+  tasks:
+  - name: POST URL to modify setting
+    uri:
+      force_basic_auth: yes
+      url: https://127.0.0.1:8089/services/properties/inputs/http%3A%2f%2F{{ token }}/disabled
+      method: POST
+      user: "{{ adminuser }}"
+      password: "{{ adminpass }}"
+      status: 200
+      validate_certs: no
+      body_format: form-urlencoded
+      body:
+        value: "{{ mode }}"
+
+  - name: Reload http input def
+    uri:
+      force_basic_auth: yes
+      url: https://127.0.0.1:8089/services/data/inputs/http/_reload
+      method: GET
+      user: "{{ adminuser }}"
+      password: "{{ adminpass }}"
+      status: 200
+      validate_certs: no
